@@ -4,3 +4,5 @@ python-dotenv
 openai
 bs4
 urllib3
+pynacl
+gtts
