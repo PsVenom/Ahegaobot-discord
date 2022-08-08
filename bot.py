@@ -4,6 +4,7 @@ from discord.ext import commands
 import random
 import os
 from dotenv import load_dotenv
+from gtts import gTTS
 
 #Importing useful functions from main.py
 from main import ask, scraper, getImg
@@ -170,9 +171,115 @@ class porn(commands.Cog):
         else:
             await ctx.send("You can only use this command in NSFW channels!")
 
+class tts(commands.Cog):
+
+    bots = commands.Bot(command_prefix=['tts'], help_command=None)
+    def __init__(self, bot):
+        self.bot = bot
+
+    @bots.command(name = 'tts')
+    async def tts(self,ctx):
+        global vc
+        channel = ctx.message.channel
+        
+        voicechannel = ctx.author.voice.channel
+        
+        try:
+            vc = await voicechannel.connect()
+        except:
+            vc
+
+        while True:
+
+            f = 0
+
+            def check(m):
+                return m.author == ctx.author
+
+            try:
+                msg = await bots.wait_for('message', timeout=120.0, check=check)
+                msg_cont = msg.content
+            except:
+                f = 1
+
+            a = msg_cont == 'end'
+            b = f == 1
+
+            if a or b:
+                await channel.send('tts disconnected due to inactivity')
+                await vc.disconnect()
+                break
+            
+            try:
+                output = gTTS(text=msg_cont, lang="en", tld="co.in")
+                output.save(f"tts.mp3")
+                vc.play(discord.FFmpegPCMAudio(source="tts.mp3", executable='ffmpeg/bin/ffmpeg.exe'))
+            except:
+                continue    
+                
+class vc(commands.Cog):
+    bots = commands.Bot(command_prefix=['vc '], help_command=None)
+
+    def __init__(self, bot):
+        self.bot = bot
+
+
+    @bots.command(name= 'vc')
+    async def vc(self, ctx):
+        global vc
+        channel=ctx.message.channel
+        answer = 0
+        
+        voicechannel = ctx.author.voice.channel
+
+        try:
+            vc = await voicechannel.connect()
+        except:
+            vc
+
+        greetings=['Heyaa!', "Hi babyy!", "Hewoo!", "Hey hottie!"]
+        greet=random.choice(greetings)
+
+        output = gTTS(text=greet, lang="en", tld="co.in")
+        output.save(f"tts.mp3")
+        vc.play(discord.FFmpegPCMAudio(source="tts.mp3", executable='ffmpeg/bin/ffmpeg.exe'))
+
+        while True:
+
+            f = 0
+
+            def check(m):
+                return m.author == ctx.author
+
+            try:
+                msg = await bots.wait_for('message', timeout=120.0, check=check)
+                msg_cont = msg.content
+            except:
+                f = 1
+
+            a = msg_cont == 'end'
+            b = f == 1
+
+            if a or b:
+                byes=['bbye baby <3 UwU','bye! I will miss ya!','Take care! <3','Cya later ^^', 'Bye! love ya!']
+                bye=random.choice(byes)
+                await channel.send(bye)
+                await vc.disconnect()
+                break
+
+            try:
+                answer = ask(msg_cont)
+                output = gTTS(text=answer, lang="en", tld="co.in")
+                output.save(f"tts.mp3")
+                vc.play(discord.FFmpegPCMAudio(source="tts.mp3", executable='ffmpeg/bin/ffmpeg.exe'))
+            except:
+                answer = "weird"
+                continue
 
 bots.add_cog(help(bots))
 bots.add_cog(sexting(bots))
 bots.add_cog(Media(bots))
 bots.add_cog(porn(bots))
+bots.add_cog(tts(bots))
+bots.add_cog(vc(bots))
 bots.run(TOKEN)
